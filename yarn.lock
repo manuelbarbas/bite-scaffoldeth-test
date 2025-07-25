@@ -3440,6 +3440,7 @@ __metadata:
   dependencies:
     "@heroicons/react": ~2.1.5
     "@rainbow-me/rainbowkit": 2.2.7
+    "@skalenetwork/bite": 0.4.1-beta.1
     "@tailwindcss/postcss": 4.0.15
     "@tanstack/react-query": ~5.59.15
     "@trivago/prettier-plugin-sort-imports": ~4.3.0
@@ -3457,6 +3458,7 @@ __metadata:
     eslint-config-next: ~15.2.3
     eslint-config-prettier: ~10.1.1
     eslint-plugin-prettier: ~5.2.4
+    ethers: 6.15.0
     kubo-rpc-client: ~5.0.2
     next: ~15.2.3
     next-nprogress-bar: ~2.3.13
@@ -3636,6 +3638,23 @@ __metadata:
   version: 7.0.2
   resolution: "@sindresorhus/is@npm:7.0.2"
   checksum: 16b20c80859feabf693a3b0d813222d9dd8b1f821cedfd0b3ffd31d4da4b497863ba353029a53d9c0f658fef53a34a082b72f9ea83f0427cf2124353ab3e3394
+  languageName: node
+  linkType: hard
+
+"@skalenetwork/bite@npm:0.4.1-beta.1":
+  version: 0.4.1-beta.1
+  resolution: "@skalenetwork/bite@npm:0.4.1-beta.1"
+  dependencies:
+    "@skalenetwork/t-encrypt": 0.5.1-develop.0
+    tslog: ^4.9.3
+  checksum: be70d1e7ac7087eb8b62cc3cb2c3b2817965b21c12db3f2b34935770161db6314bfdc1e64712be97632778f2f5cba16ab3b720b47b3705ffc86b9b4401c451a4
+  languageName: node
+  linkType: hard
+
+"@skalenetwork/t-encrypt@npm:0.5.1-develop.0":
+  version: 0.5.1-develop.0
+  resolution: "@skalenetwork/t-encrypt@npm:0.5.1-develop.0"
+  checksum: ce129db9890bc2ab4aea97831ad1b10aa6d160d537feebd49799a8d23f0f8850f1f4c4e7580889433522e91a3f42e61525a13fe247b9d7944ec7cdb54b80cb78
   languageName: node
   linkType: hard
 
@@ -8700,6 +8719,21 @@ __metadata:
     ethereum-cryptography: ^0.1.3
     rlp: ^2.2.4
   checksum: 27a3c79d6e06b2df34b80d478ce465b371c8458b58f5afc14d91c8564c13363ad336e6e83f57eb0bd719fde94d10ee5697ceef78b5aa932087150c5287b286d1
+  languageName: node
+  linkType: hard
+
+"ethers@npm:6.15.0":
+  version: 6.15.0
+  resolution: "ethers@npm:6.15.0"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.1
+    "@noble/curves": 1.2.0
+    "@noble/hashes": 1.3.2
+    "@types/node": 22.7.5
+    aes-js: 4.0.0-beta.5
+    tslib: 2.7.0
+    ws: 8.17.1
+  checksum: 3e8fb73b5cf2bef564433442adb68fe89a6da0d664c1ebe6e226fe5e7160da7010800334c3ecc53eef51ff8c10a3255fa99160e8d424f1241440043f6faa2ea1
   languageName: node
   linkType: hard
 
@@ -16166,6 +16200,13 @@ __metadata:
   version: 2.8.1
   resolution: "tslib@npm:2.8.1"
   checksum: e4aba30e632b8c8902b47587fd13345e2827fa639e7c3121074d5ee0880723282411a8838f830b55100cbe4517672f84a2472667d355b81e8af165a55dc6203a
+  languageName: node
+  linkType: hard
+
+"tslog@npm:^4.9.3":
+  version: 4.9.3
+  resolution: "tslog@npm:4.9.3"
+  checksum: 78e73f13a6bd508d6337e4847bf18f3c6f992ce83b76fa7dbbd8404f8b79e4c3001db4d96c7b9eb74e2af93f2a5eb6276b908533a898e17cbdce2c88b1d36536
   languageName: node
   linkType: hard
 

@@ -1,65 +1,195 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { BITE } from "@skalenetwork/bite";
+import { ethers } from "ethers";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { Address } from "~~/components/scaffold-eth";
+
+// MyToken ABI - Feel free to expand it as necessary
+const MyTokenABI = [
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "mint",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+];
 
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [status, setStatus] = useState<string>("");
+  const [txHash, setTxHash] = useState<string>("");
+
+  // Configuration
+  const CONTRACT_ADDRESS = "0x437F581d7C3472a089AAd0D1b53cef5DC72C7d6E";
+  const RECIPIENT_ADDRESS = "0xcE7E58D645655CB7B573Fa3B161F344e210Dd2c8";
+  const AMOUNT = "1";
+  const FAIR_RPC_URL = "https://testnet-v1.skalenodes.com/v1/idealistic-dual-miram";
+
+  // Add your private key here (make sure to keep it secure!)
+  const PRIVATE_KEY = ""; // Replace with your actual private key
+
+  const handleMint = async () => {
+    if (!PRIVATE_KEY || PRIVATE_KEY === "") {
+      setStatus("Please add your private key to the PRIVATE_KEY variable");
+      return;
+    }
+
+    setLoading(true);
+    setStatus("Preparing mint transaction...");
+    setTxHash("");
+
+    try {
+      // Create provider and wallet
+      const provider = new ethers.JsonRpcProvider(FAIR_RPC_URL);
+      const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+      console.log("Minting with account:", wallet.address);
+      setStatus(`Minting with account: ${wallet.address}`);
+
+      // Create contract instance
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, MyTokenABI, wallet);
+
+      // Encode the function data
+      const data = contract.interface.encodeFunctionData("mint", [RECIPIENT_ADDRESS, ethers.parseUnits(AMOUNT, 18)]);
+
+      // Initialize BITE
+      const bite = new BITE(FAIR_RPC_URL);
+
+      // Create transaction object
+      const transaction = {
+        to: CONTRACT_ADDRESS,
+        data: data,
+      };
+
+      setStatus("Encrypting transaction with BITE...");
+
+      // Encrypt the transaction using BITE
+      const encryptedTx = await bite.encryptTransaction(transaction);
+
+      console.log("Encrypted transaction:", encryptedTx);
+
+      setStatus("Sending encrypted transaction...");
+
+      // Send the encrypted transaction
+      const tx = await wallet.sendTransaction({
+        ...encryptedTx,
+        value: 0,
+        gasLimit: 100000,
+      });
+
+      setStatus(`Transaction sent! Hash: ${tx.hash}`);
+      setTxHash(tx.hash);
+
+      console.log("Transaction hash:", tx.hash);
+
+      // Wait for transaction to be mined
+      setStatus("Waiting for transaction to be mined...");
+      const receipt = await tx.wait();
+
+      console.log("Transaction receipt:", receipt);
+      setStatus(`✅ Mint successful! Transaction mined in block ${receipt?.blockNumber}`);
+    } catch (error: any) {
+      console.error("Mint failed:", error);
+      setStatus(`❌ Mint failed: ${error.message || error}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
       <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
+        <div className="px-5 w-full max-w-4xl">
+          <h1 className="text-center mb-8">
+            <span className="block text-4xl font-bold text-white">BITE Mint Token DApp</span>
+            <span className="block text-lg mt-2 text-white">Scaffold-ETH Integration</span>
           </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
+
+          <div className="card bg-base-100 shadow-xl mb-8">
+            <div className="card-body">
+              <h2 className="card-title text-white">Configuration</h2>
+              <div className="grid grid-cols-1 gap-4 text-sm">
+                <div className="flex flex-col space-y-1">
+                  <span className="font-semibold text-white">Contract:</span>
+                  <code className="bg-base-200 p-2 rounded text-white text-xs break-all">{CONTRACT_ADDRESS}</code>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <span className="font-semibold text-white">Recipient:</span>
+                  <code className="bg-base-200 p-2 rounded text-white text-xs break-all">{RECIPIENT_ADDRESS}</code>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <span className="font-semibold text-white">Amount:</span>
+                  <code className="bg-base-200 p-2 rounded text-white">{AMOUNT} tokens</code>
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <span className="font-semibold text-white">Network:</span>
+                  <span className="text-white font-medium">FAIR Testnet</span>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
-
-        <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col md:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
+          <div className="card bg-base-100 shadow-xl mb-8">
+            <div className="card-body">
+              <button
+                onClick={handleMint}
+                disabled={loading}
+                className={`btn btn-lg w-full ${loading ? "btn-disabled" : "btn-success hover:btn-success text-white"}`}
+              >
+                {loading && <span className="loading loading-spinner"></span>}
+                {loading ? "Minting..." : "Mint ERC-20 Token"}
+              </button>
             </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
+          </div>
+
+          {status && (
+            <div className="card bg-base-100 shadow-xl mb-8">
+              <div className="card-body">
+                <h3 className="card-title text-white">Status</h3>
+                <div className="alert alert-info">
+                  <p className="text-sm break-all text-white">{status}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {txHash && (
+            <div className="card bg-base-100 shadow-xl mb-8">
+              <div className="card-body">
+                <h3 className="card-title text-white">Transaction Hash</h3>
+                <div className="alert alert-success">
+                  <a
+                    href={`https://idealistic-dual-miram.explorer.testnet-v1.skalenodes.com/tx/${txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link link-primary break-all text-sm text-white"
+                  >
+                    {txHash}
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="card bg-warning text-warning-content shadow-xl">
+            <div className="card-body">
+              <h3 className="card-title">⚠️ Security Notice</h3>
+              <p className="text-sm">
+                Remember to add your private key to the PRIVATE_KEY variable in the code before testing. Never commit
+                your private key to version control!
               </p>
             </div>
           </div>
